@@ -14,8 +14,8 @@ public class MJTExpressWarehouse<L, P> implements DeliveryServiceWarehouse<L, P>
 
     private final int capacity;
     private final int retentionPeriod;
-    private Map<L, P> labelToParcel;
-    private Map<L, LocalDateTime> labelToTimeSubmitted;
+    private final Map<L, P> labelToParcel;
+    private final Map<L, LocalDateTime> labelToTimeSubmitted;
 
     public MJTExpressWarehouse(int capacity, int retentionPeriod) {
         this.capacity = capacity;
@@ -35,7 +35,7 @@ public class MJTExpressWarehouse<L, P> implements DeliveryServiceWarehouse<L, P>
 
         if (labelToParcel.size() >= capacity) {
             removeExpiredRetentionTimeItems();
-            if(labelToParcel.size() >= capacity){
+            if (labelToParcel.size() >= capacity) {
                 throw new CapacityExceededException("Full capacity");
             }
         }
@@ -71,7 +71,7 @@ public class MJTExpressWarehouse<L, P> implements DeliveryServiceWarehouse<L, P>
     @Override
     public double getWarehouseSpaceLeft() {
         double spaceLeft = (double) labelToParcel.size() / capacity;
-        return Math.round((1.0-spaceLeft) * 100) / 100f;
+        return Math.round((1.0 - spaceLeft) * 100) / 100f;
     }
 
     @Override
@@ -125,17 +125,17 @@ public class MJTExpressWarehouse<L, P> implements DeliveryServiceWarehouse<L, P>
         return deletedItems;
     }
 
-    private void removeExpiredRetentionTimeItems(){
-        Set<L> removedLabels= new HashSet<>();
+    private void removeExpiredRetentionTimeItems() {
+        Set<L> removedLabels = new HashSet<>();
 
-        for (Map.Entry<L,LocalDateTime> labelToTimeSubmittedElement: labelToTimeSubmitted.entrySet()) {
-            long daysBetween = ChronoUnit.DAYS.between(labelToTimeSubmittedElement.getValue(),LocalDateTime.now());
-            if((long) retentionPeriod < daysBetween){
+        for (Map.Entry<L, LocalDateTime> labelToTimeSubmittedElement : labelToTimeSubmitted.entrySet()) {
+            long daysBetween = ChronoUnit.DAYS.between(labelToTimeSubmittedElement.getValue(), LocalDateTime.now());
+            if ((long) retentionPeriod < daysBetween) {
                 removedLabels.add(labelToTimeSubmittedElement.getKey());
                 labelToParcel.remove(labelToTimeSubmittedElement.getKey());
             }
         }
-        for(L removedLabel:removedLabels){
+        for (L removedLabel : removedLabels) {
             labelToTimeSubmitted.remove(removedLabel);
         }
     }
