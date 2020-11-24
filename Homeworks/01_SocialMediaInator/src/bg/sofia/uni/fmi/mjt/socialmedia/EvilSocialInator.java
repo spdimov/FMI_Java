@@ -1,10 +1,10 @@
 package bg.sofia.uni.fmi.mjt.socialmedia;
 
 import bg.sofia.uni.fmi.mjt.socialmedia.content.AbstractContent;
+import bg.sofia.uni.fmi.mjt.socialmedia.content.ByTimeComparator;
 import bg.sofia.uni.fmi.mjt.socialmedia.content.Content;
 import bg.sofia.uni.fmi.mjt.socialmedia.content.PopularityComparator;
 import bg.sofia.uni.fmi.mjt.socialmedia.content.Post;
-import bg.sofia.uni.fmi.mjt.socialmedia.content.RecentComparator;
 import bg.sofia.uni.fmi.mjt.socialmedia.content.Story;
 import bg.sofia.uni.fmi.mjt.socialmedia.content.StringDateComparator;
 import bg.sofia.uni.fmi.mjt.socialmedia.exceptions.ContentNotFoundException;
@@ -18,17 +18,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 
 public class EvilSocialInator implements SocialMediaInator {
-    Map<String, AbstractContent> idToContent;
+    public Map<String, AbstractContent> idToContent;
     Set<String> usersSet;
     Map<String, List<String>> userToActivityLog;
 
@@ -112,24 +109,36 @@ public class EvilSocialInator implements SocialMediaInator {
     public Collection<Content> getNMostPopularContent(int n) {
         removeExpired();
 
-        SortedSet<AbstractContent> orderedByPopularityContent = new TreeSet<>(new PopularityComparator());
+        List<Content> orderedByPopularityContent = new LinkedList<>();
         orderedByPopularityContent.addAll(idToContent.values());
+        Collections.sort(orderedByPopularityContent, new PopularityComparator());
 
-        return getTopN(orderedByPopularityContent, n);
+        if (orderedByPopularityContent.size() < n) {
+            return Collections.unmodifiableCollection(orderedByPopularityContent);
+        } else {
+            return orderedByPopularityContent.subList(0, n);
+        }
     }
 
     @Override
     public Collection<Content> getNMostRecentContent(String username, int n) {
         removeExpired();
 
-        SortedSet<AbstractContent> userOrderedContent = new TreeSet<>(new RecentComparator());
+        List<Content> orderedByTimeUploadedContent = new LinkedList<>();
+
         for (AbstractContent content : idToContent.values()) {
             if (content.getUser().equals(username)) {
-                userOrderedContent.add(content);
+                orderedByTimeUploadedContent.add(content);
             }
         }
 
-        return getTopN(userOrderedContent, n);
+        Collections.sort(orderedByTimeUploadedContent, new ByTimeComparator());
+
+        if (orderedByTimeUploadedContent.size() < n) {
+            return Collections.unmodifiableCollection(orderedByTimeUploadedContent);
+        } else {
+            return orderedByTimeUploadedContent.subList(0, n);
+        }
     }
 
     @Override
@@ -140,7 +149,7 @@ public class EvilSocialInator implements SocialMediaInator {
 
         removeExpired();
 
-        String mostPopularUser = "";
+        String mostPopularUser = "rew";
         int currentPopularityIndex = 0;
         int maxPopularityIndex = 0;
 
@@ -193,23 +202,10 @@ public class EvilSocialInator implements SocialMediaInator {
         idToContent.put(c.getId(), c);
     }
 
-    private Collection<Content> getTopN(Collection<AbstractContent> orderedContents, int n) {
-        Set<Content> mostRecentContent = new HashSet<>();
-        Iterator<AbstractContent> iter = orderedContents.iterator();
-
-        while (n > 0 && iter.hasNext()) {
-            Content content = iter.next();
-            mostRecentContent.add(content);
-            n--;
-        }
-
-        return Collections.unmodifiableCollection(mostRecentContent);
-    }
-
     private int getUserPopularity(String user) {
         int popularityIndex = 0;
         for (AbstractContent content : idToContent.values()) {
-            popularityIndex += Collections.frequency(content.getMentions(), user);
+            popularityIndex += Collections.frequency(content.getMentions(), "@" + user);
         }
 
         return popularityIndex;
@@ -224,19 +220,19 @@ public class EvilSocialInator implements SocialMediaInator {
     private String createLikeLog(String id, LocalDateTime time) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss dd.MM.yy");
         String formatDateTime = time.format(formatter);
-        return formatDateTime + "Liked a content with id " + id;
+        return formatDateTime + " Liked a content with id " + id;
     }
 
     private String createPostLog(String id, LocalDateTime time) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss dd.MM.yy");
         String formatDateTime = time.format(formatter);
-        return formatDateTime + "Created a post with id " + id;
+        return formatDateTime + " Created a post with id " + id;
     }
 
     private String createStoryLog(String id, LocalDateTime time) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss dd.MM.yy");
         String formatDateTime = time.format(formatter);
-        return formatDateTime + "Created a story with id " + id;
+        return formatDateTime + " Created a story with id " + id;
     }
 
     private void removeExpired() {
@@ -250,5 +246,43 @@ public class EvilSocialInator implements SocialMediaInator {
         idToContent.keySet().removeAll(expired);
     }
 
+    public static void main(String[] args) {
+        EvilSocialInator testInator = new EvilSocialInator();
+        testInator.register("vinica_boy");
+        testInator.register("sdimov");
 
+        testInator.publishPost("vinica_boy", LocalDateTime.now(), "publish1 @sdimov");
+        testInator.like("sdimov", "vinica_boy-0");
+
+        testInator.publishStory("sdimov", LocalDateTime.now(), "story1");
+        testInator.comment("vinica_boy", "#comment", "sdimov-1");
+        testInator.publishStory("vinica_boy", LocalDateTime.of(2020, 11, 24, 13, 20), "story2 #story @sdimov");
+        testInator.comment("sdimov", "@vinica_boy", "sdimov-1");
+        testInator.comment("sdimov", "@vinica_boy", "vinica_boy-2");
+        testInator.publishStory("sdimov", LocalDateTime.now(), "@vinica_boy #story");
+        testInator.publishStory("sdimov", LocalDateTime.now(), "@vinica_bo #story");
+        testInator.publishStory("sdimov", LocalDateTime.now(), "@vinica_boy");
+
+        testInator.comment("vinica_boy", "#comment", "sdimov-1");
+        for (String s : testInator.getActivityLog("vinica_boy")) {
+            System.out.println(s);
+        }
+        for (String s : testInator.getActivityLog("sdimov")) {
+            System.out.println(s);
+        }
+
+
+        System.out.println();
+        for (Content cont : testInator.getNMostRecentContent("sdimov", 3)) {
+            for (String s : cont.getMentions()) {
+                System.out.println(s);
+            }
+        }
+
+        System.out.println(testInator.getMostPopularUser());
+
+        for (Content c : testInator.findContentByTag("#story")) {
+            System.out.println(c.getId());
+        }
+    }
 }
