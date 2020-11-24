@@ -245,44 +245,4 @@ public class EvilSocialInator implements SocialMediaInator {
 
         idToContent.keySet().removeAll(expired);
     }
-
-    public static void main(String[] args) {
-        EvilSocialInator testInator = new EvilSocialInator();
-        testInator.register("vinica_boy");
-        testInator.register("sdimov");
-
-        testInator.publishPost("vinica_boy", LocalDateTime.now(), "publish1 @sdimov");
-        testInator.like("sdimov", "vinica_boy-0");
-
-        testInator.publishStory("sdimov", LocalDateTime.now(), "story1");
-        testInator.comment("vinica_boy", "#comment", "sdimov-1");
-        testInator.publishStory("vinica_boy", LocalDateTime.of(2020, 11, 24, 13, 20), "story2 #story @sdimov");
-        testInator.comment("sdimov", "@vinica_boy", "sdimov-1");
-        testInator.comment("sdimov", "@vinica_boy", "vinica_boy-2");
-        testInator.publishStory("sdimov", LocalDateTime.now(), "@vinica_boy #story");
-        testInator.publishStory("sdimov", LocalDateTime.now(), "@vinica_bo #story");
-        testInator.publishStory("sdimov", LocalDateTime.now(), "@vinica_boy");
-
-        testInator.comment("vinica_boy", "#comment", "sdimov-1");
-        for (String s : testInator.getActivityLog("vinica_boy")) {
-            System.out.println(s);
-        }
-        for (String s : testInator.getActivityLog("sdimov")) {
-            System.out.println(s);
-        }
-
-
-        System.out.println();
-        for (Content cont : testInator.getNMostRecentContent("sdimov", 3)) {
-            for (String s : cont.getMentions()) {
-                System.out.println(s);
-            }
-        }
-
-        System.out.println(testInator.getMostPopularUser());
-
-        for (Content c : testInator.findContentByTag("#story")) {
-            System.out.println(c.getId());
-        }
-    }
 }
