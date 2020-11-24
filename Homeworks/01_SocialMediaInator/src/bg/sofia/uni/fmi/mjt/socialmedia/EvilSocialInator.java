@@ -1,12 +1,12 @@
 package bg.sofia.uni.fmi.mjt.socialmedia;
 
 import bg.sofia.uni.fmi.mjt.socialmedia.content.AbstractContent;
-import bg.sofia.uni.fmi.mjt.socialmedia.content.ByTimeComparator;
 import bg.sofia.uni.fmi.mjt.socialmedia.content.Content;
-import bg.sofia.uni.fmi.mjt.socialmedia.content.PopularityComparator;
 import bg.sofia.uni.fmi.mjt.socialmedia.content.Post;
 import bg.sofia.uni.fmi.mjt.socialmedia.content.Story;
-import bg.sofia.uni.fmi.mjt.socialmedia.content.StringDateComparator;
+import bg.sofia.uni.fmi.mjt.socialmedia.content.comparators.ByTimeComparator;
+import bg.sofia.uni.fmi.mjt.socialmedia.content.comparators.PopularityComparator;
+import bg.sofia.uni.fmi.mjt.socialmedia.content.comparators.StringDateComparator;
 import bg.sofia.uni.fmi.mjt.socialmedia.exceptions.ContentNotFoundException;
 import bg.sofia.uni.fmi.mjt.socialmedia.exceptions.NoUsersException;
 import bg.sofia.uni.fmi.mjt.socialmedia.exceptions.UsernameAlreadyExistsException;
