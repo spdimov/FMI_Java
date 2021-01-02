@@ -43,7 +43,6 @@ public class ClientRequestHandler implements Runnable {
 
     private String processCommand(String commandLine, Map<String, Set<String>> studentToPresents) {
         final int COMMAND_POS = 0;
-        final int STUDENT_POS = 1;
 
         String[] commandComponents = commandLine.split(" ");
 

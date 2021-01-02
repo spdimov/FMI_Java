@@ -22,11 +22,6 @@ public class WishListServer {
         executor = Executors.newFixedThreadPool(MAX_EXECUTOR_THREADS);
     }
 
-    public static void main(String[] args) {
-        WishListServer wishListServer = new WishListServer(5555);
-        wishListServer.start();
-    }
-
     public void start() {
 
         try (ServerSocket serverSocket = new ServerSocket(SERVER_PORT)) {
