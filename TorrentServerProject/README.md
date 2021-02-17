@@ -58,7 +58,7 @@ Gosho321 – 127.0.0.1:2314
 
 Една подсказваща **диаграма**:
 
-![Peer-to-Peer Diagram](../images/peer-to-peer.png)
+![Peer-to-Peer Diagram](../peer-to-peer.png)
 
 ### Submission
 
